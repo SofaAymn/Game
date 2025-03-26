@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة بينج بونج</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        #score {
+            font-size: 20px;
+            margin: 10px;
+            padding: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+        }
+        #gameArea {
+            width: 600px;
+            height: 400px;
+            background-color: #ddd;
+            position: relative;
+            border: 2px solid #333;
+        }
+        .paddle {
+            width: 20px;
+            height: 80px;
+            background-color: #4CAF50;
+            position: absolute;
+        }
+        #paddleLeft {
+            left: 0;
+        }
+        #paddleRight {
+            right: 0;
+        }
+        #ball {
+            width: 15px;
+            height: 15px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>لعبة بينج بونج</h1>
+    <div id="score">النتيجة: 0 - 0</div>
+    <div id="gameArea">
+        <div id="paddleLeft" class="paddle"></div>
+        <div id="paddleRight" class="paddle"></div>
+        <div id="ball"></div>
+    </div>
+
+    <script>
+        var paddleLeft = document.getElementById("paddleLeft");
+        var paddleRight = document.getElementById("paddleRight");
+        var ball = document.getElementById("ball");
+        var scoreElement = document.getElementById("score");
+        var gameArea = document.getElementById("gameArea");
+
+        var leftScore = 0;
+        var rightScore = 0;
+
+        var ballX = 290; // Starting X position of ball
+        var ballY = 190; // Starting Y position of ball
+        var ballSpeedX = 5; // Horizontal speed (faster)
+        var ballSpeedY = 5; // Vertical speed (faster)
+
+        var paddleSpeed = 20; // Speed of paddles
+        var paddleHeight = 80;
+
+        var paddleLeftY = 160;
+        var paddleRightY = 160;
+
+        // Update the paddles and ball position
+        function updateGame() {
+            // Move the ball
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Collision with top and bottom walls
+            if (ballY <= 0 || ballY >= gameArea.clientHeight - ball.offsetHeight) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Collision with left paddle
+            if (ballX <= paddleLeft.offsetWidth && ballY + ball.offsetHeight >= paddleLeftY && ballY <= paddleLeftY + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+            }
+
+            // Collision with right paddle
+            if (ballX >= gameArea.clientWidth - ball.offsetWidth - paddleRight.offsetWidth && ballY + ball.offsetHeight >= paddleRightY && ballY <= paddleRightY + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+            }
+
+            // Ball out of bounds (left side)
+            if (ballX <= 0) {
+                rightScore++;
+                updateScore();
+                resetBall();
+            }
+
+            // Ball out of bounds (right side)
+            if (ballX >= gameArea.clientWidth - ball.offsetWidth) {
+                leftScore++;
+                updateScore();
+                resetBall();
+            }
+
+            // Update ball position
+            ball.style.left = ballX + "px";
+            ball.style.top = ballY + "px";
+        }
+
+        // Update score
+        function updateScore() {
+            scoreElement.textContent = "النتيجة: " + leftScore + " - " + rightScore;
+        }
+
+        // Reset ball position after scoring
+        function resetBall() {
+            ballX = gameArea.clientWidth / 2 - ball.offsetWidth / 2;
+            ballY = gameArea.clientHeight / 2 - ball.offsetHeight / 2;
+            ballSpeedX = 5 * (Math.random() < 0.5 ? 1 : -1); // Randomize direction (faster)
+            ballSpeedY = 5 * (Math.random() < 0.5 ? 1 : -1); // Randomize direction (faster)
+        }
+
+        // Handle player 1 controls (left paddle) with arrow keys
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "ArrowUp" && paddleLeftY > 0) {
+                paddleLeftY -= paddleSpeed;
+            }
+            if (event.key === "ArrowDown" && paddleLeftY < gameArea.clientHeight - paddleHeight) {
+                paddleLeftY += paddleSpeed;
+            }
+
+            // Update left paddle position
+            paddleLeft.style.top = paddleLeftY + "px";
+        });
+
+        // Handle player 2 controls (right paddle) with mouse
+        gameArea.addEventListener("mousemove", function(event) {
+            var mouseY = event.clientY - gameArea.getBoundingClientRect().top;
+            if (mouseY > paddleHeight / 2 && mouseY < gameArea.clientHeight - paddleHeight / 2) {
+                paddleRightY = mouseY - paddleHeight / 2;
+            }
+            paddleRight.style.top = paddleRightY + "px";
+        });
+
+        // Initialize paddles and ball
+        function initGame() {
+            paddleLeft.style.top = paddleLeftY + "px";
+            paddleRight.style.top = paddleRightY + "px";
+            ball.style.left = ballX + "px";
+            ball.style.top = ballY + "px";
+            updateScore();
+            setInterval(updateGame, 1000 / 60); // Game loop
+        }
+
+        // Start the game
+        initGame();
+    </script>
+
+</body>
+</html>
